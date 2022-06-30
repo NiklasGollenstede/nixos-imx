@@ -1,0 +1,67 @@
+{
+  "nodes": {
+    "config": {
+      "locked": {
+        "dir": "example/defaultConfig",
+        "lastModified": 1652094794,
+        "narHash": "sha256-YKsmTOispYxmmpf7i9BJ0Gt9itLcfyXExteYQoZUfGQ=",
+        "owner": "NiklasGollenstede",
+        "repo": "nix-wiplib",
+        "rev": "5e9cc7ce3440be9ce6aeeaedcc70db9c80489c5f",
+        "type": "github"
+      },
+      "original": {
+        "dir": "example/defaultConfig",
+        "owner": "NiklasGollenstede",
+        "repo": "nix-wiplib",
+        "rev": "5e9cc7ce3440be9ce6aeeaedcc70db9c80489c5f",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1656265786,
+        "narHash": "sha256-A9RkoGrxzsmMm0vily18p92Rasb+MbdDMaSnzmywXKw=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "cd90e773eae83ba7733d2377b6cdf84d45558780",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-22.05",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs": "nixpkgs",
+        "wiplib": "wiplib"
+      }
+    },
+    "wiplib": {
+      "inputs": {
+        "config": "config",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1656448207,
+        "narHash": "sha256-g87JlRiFCtgRsMR9wtfZDvqij353gDqB00QAf8U9GTU=",
+        "owner": "NiklasGollenstede",
+        "repo": "nix-wiplib",
+        "rev": "8b0e200c7387dca829aa750633868223f0b87ff2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NiklasGollenstede",
+        "repo": "nix-wiplib",
+        "type": "github"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

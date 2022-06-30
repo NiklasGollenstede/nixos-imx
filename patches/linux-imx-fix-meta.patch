@@ -1,0 +1,10 @@
+--- a/drivers/video/fbdev/mxc/mxc_dispdrv.c
++++ b/drivers/video/fbdev/mxc/mxc_dispdrv.c
+@@ -149,1 +149,2 @@
+ EXPORT_SYMBOL_GPL(mxc_dispdrv_getdata);
++MODULE_LICENSE("GPL v2");
+--- a/drivers/video/fbdev/mxc/mxc_edid.c
++++ b/drivers/video/fbdev/mxc/mxc_edid.c
+@@ -769,1 +769,2 @@
+ EXPORT_SYMBOL(mxc_edid_read);
++MODULE_LICENSE("GPL v2");
