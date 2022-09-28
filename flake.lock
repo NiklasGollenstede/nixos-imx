@@ -48,11 +48,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1656448207,
-        "narHash": "sha256-g87JlRiFCtgRsMR9wtfZDvqij353gDqB00QAf8U9GTU=",
+        "lastModified": 1661927913,
+        "narHash": "sha256-fVHMkqdNoYpbld7FsOflnh+Uj8iNF6ZG4KIFlECqKFY=",
         "owner": "NiklasGollenstede",
         "repo": "nix-wiplib",
-        "rev": "8b0e200c7387dca829aa750633868223f0b87ff2",
+        "rev": "1d93a8acc0cdf7ae88c7954fec9cf770cac8e119",
         "type": "github"
       },
       "original": {

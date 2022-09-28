@@ -25,7 +25,7 @@ in {
         pkgs, lib, # (provided by callPackage)
 
         # The target SoC, e.g »imx8mp«:
-        platform ? null, # needs to be overridden explicitly
+        platform ? "", # needs to be overridden explicitly
         platformSuffix ? "_evk",
 
     }: (pkgs.buildUBoot (let

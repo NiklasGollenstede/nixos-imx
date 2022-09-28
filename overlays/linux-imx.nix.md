@@ -13,10 +13,9 @@ dirname: inputs: final: prev: let
     inherit (final) pkgs; inherit (inputs.self) lib;
 in {
 
-    linux-imx_v8 = pkgs.callPackage ({
-        pkgs, lib, # (provided by callPackage)
+    linux-imx_v8 = pkgs.callPackage (args@{
 
-        # Override this for a different CPU generation:
+        # Override this for a different CPU generations:
         configfilePath ? "arch/arm64/configs/imx_v8_defconfig", # imx_v6/v7_defconfig is in arch/arm/configs
 
         # Override these to update:
@@ -24,22 +23,25 @@ in {
         rev ? "lf-${version}-1.0.0", # must use tags created by NXP (and not ones merged from upstream?)
         hash ? "sha256-iTagiSjU65V7ZpKQa4IMZeRp8lTTcRNohJ2S2hgaETs=",
 
-        patches ? [ ],
+        lib, stdenv, ... # Just forward whatever else the system's config passes.
+    }: (pkgs.linuxKernel.manualConfig (args // rec {
 
-        ... # TODO: This swallows (and thereby ignores) a number of parameters that some mechanism is passing in here. They seem to be based on the system's config ...
-    }: (pkgs.linuxKernel.customPackage rec {
-        inherit version; src = pkgs.applyPatches { src = pkgs.fetchgit {
+        inherit version; src = pkgs.applyPatches { name = "linux-imx-patched"; src = pkgs.fetchgit {
             url = "https://source.codeaurora.org/external/imx/linux-imx"; inherit rev hash;
-        }; name = "linux-imx-patched"; patches = patches ++ [
+        }; patches = [
             ../patches/linux-imx-extend-config.patch # Enable all features that NixOS wants.
             ../patches/linux-imx-remove-flags.patch
-        ]; }; # (apply patches here, so that the defconfig file can be patched:)
+        ]; }; # (apply patches here, so that the defconfig file can be patched)
+
         configfile = "${src}/${configfilePath}";
-    }).kernel.overrideAttrs (old: {
+
+        allowImportFromDerivation = true;
+
+    })).overrideAttrs (old: {
         hardeningDisable = (old.hardeningDisable or [ ]) ++ [ "relro" ]; # suppress warning that this isn't supported (for aarch64)
     })) { };
 
-    # NixOS' "everything as module" strategy also works, but it's a bit of a mess:
+    # NixOS' "everything as module" strategy also works on the patched sources and »imx_v8_defconfig«, but it's a bit of a mess:
     linux-imx = pkgs.callPackage (args@{
         stdenv, lib, buildPackages, fetchgit, perl,
         buildLinux, defconfig ? "imx_v8_defconfig",
@@ -52,7 +54,7 @@ in {
         };
     in lib.overrideDerivation (buildLinux (args // { # The structure of this was taken from <https://github.com/NixOS/nixpkgs/blob/nixos-21.11/pkgs/os-specific/linux/kernel/linux-rpi.nix>.
         version = "${modDirVersion}"; inherit src modDirVersion defconfig;
-        kernelPatches = [ {
+        kernelPatches = (args.kernelPatches or [ ]) ++ [ {
             patch = ../patches/linux-imx-fix-redefine.patch;
             name = "without request_secure_key redefinition";
         } {
@@ -89,9 +91,6 @@ in {
             hydraPlatforms = [ "aarch64-linux" ];
         };
     } // (args.argsOverride or { }))) (old: {
-        # TODO: try this:
-        #configfile = "./arch/arm64/configs/${defconfig}"; # v6/v7 is in arch/arm/configs
-        #hardeningDisable = (old.hardeningDisable or [ ]) ++ [ "relro" ]; # this seems to have no effect here
     }))) { };
 
 }

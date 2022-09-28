@@ -11,6 +11,10 @@ To prepare the microSD `/dev/sdX`, as `sudo` user with `nix` installed, run:
 ```bash
  nix run '.#imx8mp' -- sudo install-system /dev/sdX
 ```
+Or for the version cross-compiled from `x64`, run:
+```bash
+ nix run '.#x64:imx8mp' -- sudo install-system /dev/sdX
+```
 Then put the card into the board, and use the switch to re-enable power.
 
 
@@ -19,7 +23,7 @@ Then put the card into the board, and use the switch to re-enable power.
 ```nix
 #*/# end of MarkDown, beginning of NixOS config flake input:
 dirname: inputs: specialArgs@{ config, pkgs, lib, name, ... }: let inherit (inputs.self) lib; in let
-    hash = builtins.substring 0 8 (builtins.hashString "sha256" config.networking.hostName);
+    hash = builtins.substring 0 8 (builtins.hashString "sha256" name);
 in { imports = [ ({ ## Hardware
 
     wip.preface.hardware = "aarch64"; system.stateVersion = "22.05";
@@ -29,13 +33,20 @@ in { imports = [ ({ ## Hardware
     nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "firmware-imx" ];
 
     # Disk setup:
-    wip.fs.disks.devices.primary.size = 31914983424; # If this mismatches, use whatever the installer says.
-    wip.fs.temproot = { enable = true; temp.type = "tmpfs"; local.type = "bind"; local.bind.base = "f2fs"; remote.type = "none"; swap.size = "8G"; };
+    wip.fs.disks.devices.primary.size = 31657558016; # If this mismatches, use whatever the installer says.
+    wip.fs.temproot = { enable = true; temp.type = "tmpfs"; local.type = "bind"; remote.type = "none"; swap.size = "8G"; swap.asPartition = true; };
+    wip.fs.disks.partitions."local-${hash}" = { type = "8300"; };
+    fileSystems.${config.wip.fs.temproot.local.bind.source} = { fsType = "ext4"; device = "/dev/disk/by-partlabel/local-${hash}"; formatOptions = "-O inline_data -E nodiscard -F"; options = [ "nosuid" "nodev" "noatime" ]; };
 
     # Networking:
     networking.useDHCP = true;
 
     wip.base.enable = true;
+
+    # Fix »raid0« module missing:
+    imports = [ (lib.wip.makeNixpkgsModuleConfigOptional (specialArgs) "tasks/swraid.nix") ];
+    disableModule."tasks/swraid.nix" = true;
+
 
 }) ({ ## Other Temporary Test Stuff
 
@@ -53,6 +64,6 @@ in { imports = [ ({ ## Hardware
 
     environment.systemPackages = [ pkgs.tmux pkgs.htop pkgs.libubootenv ];
 
-    boot.kernelPackages = lib.mkForce pkgs.linuxPackages; # building the i.MX kernel on x64 is quite time consuming and not always necessary, might want to remove this later and then rebuild the proper kernel on the board
+    boot.kernelPackages = lib.mkIf (config.nixpkgs.crossSystem == null) (lib.mkForce pkgs.linuxPackages); # When not cross-compiling, building the i.MX Kernel on x64 (through qemu) takes quite a long time. The default (hydra built) aarch64 Kernel also works for the most part. (Might want to remove this later and then rebuild the proper kernel on the board.)
 
 })  ]; }

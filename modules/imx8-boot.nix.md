@@ -13,6 +13,23 @@ U-boot is (usually) configured to only output to the UART console.
 nix-shell -p tio --run 'tio /dev/ttyUSB2' # (tio uses the correct settings by default)
 ```
 
+## Notice
+
+The »linux-imx_v8« kernel as it is now builds some things that NixOS expects to exist as modules either not at all, or not as a module. They thus have to be un-included from the host's config.
+Most are excluded by setting `boot.initrd.includeDefaultModules = false` (though some hosts might need individual ones of the default modules added back explicitly).
+The `tasks/swraid.nix` module in `nixpkgs` unfortunately unconditionally includes the `raid0` module, which also does not exist. Removing modules can not be done conditionally (on this module being enabled).
+
+If there is a problem with the `raid0` kernel module, exclude the `tasks/swraid.nix` NixOS module form the host config in question:
+```nix
+{
+    imports = [ (lib.wip.makeNixpkgsModuleConfigOptional (specialArgs) "tasks/swraid.nix") ]; # This can be set globally for all hosts, but may only be defined once per config.
+    disableModule."tasks/swraid.nix" = true; # And then the module can be disabled per host.
+} // { # OR
+    imports = [ { disabledModules = [ "tasks/swraid.nix" ]; } ]; # Add this import only for hosts where the module is to be removed (but consider that this also removes any option definitions made by the module, which may break evaluation elsewhere).
+}
+```
+
+
 ## Implementation
 
 ```nix
@@ -38,21 +55,20 @@ in {
         };
 
         default-boot-image = let # This works for »SOC=iMX8MP«; other boards may need to copy in different files.
+            targetPkgs = if config.nixpkgs.crossSystem == null || config.nixpkgs.crossSystem.system == config.nixpkgs.localSystem.system then specialArgs.pkgs else import inputs.nixpkgs { inherit (config.nixpkgs) config overlays; localSystem.system = config.nixpkgs.crossSystem.system; crossSystem = null; };
             SOC = cfg.soc; SOC_DIR = if lib.wip.startsWith "iMX8M" SOC then "iMX8M" else SOC;
             LPDDR_FW_VERSION = "_202006"; # This must match the files in »firmware-imx«.
         in pkgs.stdenv.mkDerivation rec {
             # Found this when I was just about done. Nice to know someone else came to the same solution: https://gist.github.com/KunYi/6ababe7ca5f00eb87a216eb52f4bdc3b
             # Also: https://variwiki.com/index.php?title=Yocto_Build_U-Boot&release=RELEASE_DUNFELL_V1.1_DART-MX8M-MINI
-            name = "${lib.toLower SOC}-evk-boot-image"; src = pkgs.mkimage_imx8; buildInputs = [ pkgs.dtc ];
+            name = "${lib.toLower SOC}-evk-boot-image"; src = targetPkgs.mkimage_imx8; nativeBuildInputs = [ pkgs.dtc pkgs.gcc ];
             inherit SOC SOC_DIR LPDDR_FW_VERSION;
             patchPhase = ''
                 cp --no-preserve=mode -v -T ${cfg.uboot.package}/u-boot-spl.bin ./${SOC_DIR}/u-boot-spl.bin
                 cp --no-preserve=mode -v -T ${cfg.uboot.package}/u-boot-nodtb.bin ./${SOC_DIR}/u-boot-nodtb.bin
                 cp --no-preserve=mode -v -T ${cfg.uboot.package}/${lib.toLower SOC}-evk.dtb ./${SOC_DIR}/${lib.toLower SOC}-evk.dtb
-                # TODO:? uboot/arch/arm/dts/fsl-imx8mq-ddr4-arm2.dtb (https://github.com/Freescale/imx-mkimage/commit/4f37552589b921d6e24618e4ae1b33a54f87c3ce)
                 cp --no-preserve=mode -v ${pkgs.firmware-imx}/firmware/ddr/synopsys/lpddr4_pmu_train_{1d_dmem,1d_imem,2d_dmem,2d_imem}${LPDDR_FW_VERSION}.bin ./${SOC_DIR}/
                 cp --no-preserve=mode -v -T ${pkgs.imx-atf.override { platform = lib.toLower SOC; }}/bl31.bin ./${SOC_DIR}/bl31.bin
-                #cp -v ${pkgs.ubootTools}/bin/mkimage ./${SOC_DIR}/mkimage_uboot
             '';
             buildPhase = ''make SOC=${SOC} flash_evk''; # or something more specific, like flash_lpddr4_ddr4_evk
             #installPhase = ''wd=$(pwd) ; cd .. ; mv $wd $out ; cd $out ; cp ./${SOC_DIR}/flash.bin $out/'';
@@ -76,8 +92,8 @@ in {
         wip.fs.disks.partitions."bootloader-${hash}" = { type = "ef02"; position = "64"; size = lib.mkDefault (toString (cfg.uboot.package.envOffset / 512 - 64)); index = lib.mkDefault 127; order = lib.mkDefault 2000; alignment = 1; }; # The boot image needs to start at position 32K (64×512b) and is about 2MB in size.
         wip.fs.disks.partitions."uboot-env-${hash}" = { type = "ef02"; position = toString (cfg.uboot.package.envOffset / 512); size = toString (cfg.uboot.package.envSize / 512); index = lib.mkDefault 128; order = lib.mkDefault 2000; alignment = 1; }; # The position and size of the U-boot env are compiled into U-boot.
         wip.fs.disks.postFormatCommands = ''
-            [[ ! -e /dev/disk/by-partlabel/bootloader-${hash} ]] || cat /dev/null >/dev/disk/by-partlabel/bootloader-${hash}
             ${if (config.wip.fs.disks.partitions."bootloader-${hash}" or null) != null then ''
+                cat /dev/null         >/dev/disk/by-partlabel/bootloader-${hash}
                 cat ${cfg.boot-image} >/dev/disk/by-partlabel/bootloader-${hash}
             '' else ''
                 function get-parent-disk {( set -eu ; # 1: partition
@@ -120,11 +136,9 @@ in {
 
         ## Kernel:
         hardware.deviceTree.filter = lib.mkDefault "*${lib.toLower cfg.soc}*.dtb"; # (there is even a »imx8mp-evk.dtb« with the default kernel, but it has no display output)
-        boot.kernelPackages = pkgs.linuxPackagesFor (pkgs.linux-imx_v8);
+        boot.kernelPackages = lib.mkDefault (pkgs.linuxPackagesFor (pkgs.linux-imx_v8));
 
-        # The »linux-imx_v8« kernel as it is now is missing some modules that NixOS expects by default (but which are likely unnecessary to have available), so remove their inclusion:
-        #disableModule."tasks/swraid.nix" = true;
-        boot.initrd.includeDefaultModules = false; # TODO: might need some of these back
+        boot.initrd.includeDefaultModules = false; # (might need some of these back)
         boot.initrd.availableKernelModules = [ "ext2" "ext4" ];
 
         # Alternative kernel build:
@@ -133,7 +147,5 @@ in {
 
 
     }) ]);
-
-    #imports = [ (lib.wip.makeNixpkgsModuleConfigOptional (specialArgs) "tasks/swraid.nix") ];
 
 }

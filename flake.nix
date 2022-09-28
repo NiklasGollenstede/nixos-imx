@@ -16,6 +16,7 @@
 in [ # Run »nix flake show --allow-import-from-derivation« to see what this merges to:
     repo { inherit lib; } # => lib overlays.* nixosModules.*
     (lib.wip.mkSystemsFlake { inherit inputs; }) # => nixosConfigurations.* packages.*-linux.all-systems
+    (lib.wip.mkSystemsFlake { inherit inputs; localSystem = "x86_64-linux"; renameOutputs = key: "x64:${key}"; }) # => nixosConfigurations.x64:* packages.*-linux.x64:all-systems
     (lib.wip.forEachSystem [ "aarch64-linux" "x86_64-linux" ] (localSystem: {
         packages = lib.wip.getModifiedPackages (lib.wip.importPkgs inputs { system = localSystem; }) overlays;
         defaultPackage = self.packages.${localSystem}.all-systems;

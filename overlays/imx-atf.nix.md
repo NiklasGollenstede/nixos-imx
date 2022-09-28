@@ -23,7 +23,7 @@ in {
 
     imx-atf = pkgs.callPackage ({
         pkgs, lib,
-        platform ? null, # needs to be overridden explicitly
+        platform ? "", # needs to be overridden explicitly
     }: pkgs.stdenv.mkDerivation rec {
         meta = { license = lib.licenses.mit; description = "ARM Trusted Firmware for the i.MX ${platform}"; };
         pname = "arm-trusted-firmware-${platform}"; version = "2.6"; # from »./Makefile«
@@ -32,7 +32,8 @@ in {
             rev = "f78cb61a11da3d965be809ebf8b592a8c33f6473"; # from branch »github.com/master«
             hash = "sha256-VnNWfA6ZYXDrYVEmvaU84eC9K5p/nayfwERjyhf48dQ=";
         });
-        buildPhase = ''set -x ; make PLAT=${platform} bl31'';
+        nativeBuildInputs = [ pkgs.gcc ]; # (required for cross-compiling ...)
+        buildPhase = ''platform=${platform} ; make PLAT=''${platform:?} bl31'';
         installPhase = ''mkdir -p $out/ ; cp -v ./build/${platform}/release/bl31.bin $out/'';
         dontStrip = true;
     }) { };

@@ -12,16 +12,19 @@ As such, this is not an installable package but rather a prepared input for buil
 The creation of the boot images is a bit of a mess and requires moving files into the source tree before calling make.
 Which exact files those are depends on the SOC.
 
+Also, `mkimage_imx8` does not cross-compile. So when cross-compiling the system, this package has to be explicitly non-cross-compiled (not pretty, and requires qemu binfmt registration, but at least it works).
+
 ```nix
 { boot-image = let
     SOC = cfg.soc; SOC_DIR = if lib.wip.startsWith "iMX8M" SOC then "iMX8M" else SOC;
     LPDDR_FW_VERSION = "_202006"; # This must match the files in »firmware-imx«.
+    targetPkgs = if config.nixpkgs.crossSystem == null || config.nixpkgs.crossSystem.system == config.nixpkgs.localSystem.system then specialArgs.pkgs else import inputs.nixpkgs { inherit (config.nixpkgs) config overlays; localSystem.system = config.nixpkgs.crossSystem.system; crossSystem = null; }; # (don't try to cross-compile »mkimage_imx8«)
 in pkgs.stdenv.mkDerivation rec {
-    name = "${lib.toLower SOC}-evk-boot-image"; src = pkgs.mkimage_imx8; buildInputs = [ pkgs.dtc ];
+    name = "${lib.toLower SOC}-evk-boot-image"; src = targetPkgs.mkimage_imx8; nativeBuildInputs = [ pkgs.dtc pkgs.gcc ];
     inherit SOC SOC_DIR LPDDR_FW_VERSION;
     patchPhase = ''
-        cp -v ${uboot}/... ./${SOC_DIR}/
-        cp -v ${pkgs.firmware-imx}/... ./${SOC_DIR}/
+        cp -v ${uboot}/{...} ./${SOC_DIR}/
+        cp -v ${pkgs.firmware-imx}/.../{...}${LPDDR_FW_VERSION}.bin ./${SOC_DIR}/
         cp -v ${pkgs.imx-atf.override { platform = lib.toLower SOC; }}/bl31.bin ./${SOC_DIR}/
     '';
     buildPhase = ''make SOC=${SOC} flash_evk''; # or something more specific
