@@ -44,12 +44,9 @@ The [flake.nix](./flake.nix) defines additional hosts prefixed with `x64:`, whic
 
 ## License
 
-All files in this repository ([`nixos-imx` / NixOS for i.MX](https://github.com/NiklasGollenstede/nixos-imx)) (except COPYING*) are authored by the authors of this repository, and are copyright 2022 Niklas Gollenstede.
+All files in this repository ([`nixos-imx` / NixOS for i.MX](https://github.com/NiklasGollenstede/nixos-imx)) (except LICENSE) are authored by the authors of this repository, and are copyright 2022 Niklas Gollenstede.
 
-"NixOS for i.MX" is free software: you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+This software may be used under the terms of the MIT license, as detailed in [`./LICENSE`](./LICENSE).
 
-"NixOS for i.MX" is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
-
-You should have received a copy of the GNU [Lesser](./COPYING.LESSER) [General Public License](./COPYING) along with "NixOS for i.MX". If not, see <https://www.gnu.org/licenses/>.
-
-This license applies to the files in this repository only. Any external packages are built from sources that have their own licenses, which should be the ones indicated in the package's metadata.
+This license applies to the files in this repository only.
+Any external packages are built from sources that have their own licenses, which should be the ones indicated in the package's metadata.
