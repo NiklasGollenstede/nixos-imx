@@ -22,7 +22,7 @@ The `tasks/swraid.nix` module in `nixpkgs` unfortunately unconditionally include
 If there is a problem with the `raid0` kernel module, exclude the `tasks/swraid.nix` NixOS module form the host config in question:
 ```nix
 {
-    imports = [ (lib.wip.makeNixpkgsModuleConfigOptional (specialArgs) "tasks/swraid.nix") ]; # This can be set globally for all hosts, but may only be defined once per config.
+    imports = [ (lib.wip.makeNixpkgsModuleConfigOptional "tasks/swraid.nix" { }) ]; # This can be set globally for all hosts, but may only be defined once per config.
     disableModule."tasks/swraid.nix" = true; # And then the module can be disabled per host.
 } // { # OR
     imports = [ { disabledModules = [ "tasks/swraid.nix" ]; } ]; # Add this import only for hosts where the module is to be removed (but consider that this also removes any option definitions made by the module, which may break evaluation elsewhere).
@@ -55,13 +55,13 @@ in {
         };
 
         default-boot-image = let # This works for »SOC=iMX8MP«; other boards may need to copy in different files.
-            targetPkgs = if config.nixpkgs.crossSystem == null || config.nixpkgs.crossSystem.system == config.nixpkgs.localSystem.system then specialArgs.pkgs else import inputs.nixpkgs { inherit (config.nixpkgs) config overlays; localSystem.system = config.nixpkgs.crossSystem.system; crossSystem = null; };
+            targetPkgs = if config.nixpkgs.crossSystem == null || config.nixpkgs.crossSystem.system == config.nixpkgs.localSystem.system then pkgs else import pkgs.path { inherit (config.nixpkgs) config overlays; localSystem.system = config.nixpkgs.crossSystem.system; crossSystem = null; };
             SOC = cfg.soc; SOC_DIR = if lib.wip.startsWith "iMX8M" SOC then "iMX8M" else SOC;
             LPDDR_FW_VERSION = "_202006"; # This must match the files in »firmware-imx«.
         in pkgs.stdenv.mkDerivation rec {
             # Found this when I was just about done. Nice to know someone else came to the same solution: https://gist.github.com/KunYi/6ababe7ca5f00eb87a216eb52f4bdc3b
             # Also: https://variwiki.com/index.php?title=Yocto_Build_U-Boot&release=RELEASE_DUNFELL_V1.1_DART-MX8M-MINI
-            name = "${lib.toLower SOC}-evk-boot-image"; src = targetPkgs.mkimage_imx8; nativeBuildInputs = [ pkgs.dtc pkgs.gcc ];
+            name = "${lib.toLower SOC}-evk-boot-image"; src = targetPkgs.mkimage_imx8; nativeBuildInputs = [ pkgs.dtc pkgs.gcc targetPkgs.binutils ];
             inherit SOC SOC_DIR LPDDR_FW_VERSION;
             patchPhase = ''
                 cp --no-preserve=mode -v -T ${cfg.uboot.package}/u-boot-spl.bin ./${SOC_DIR}/u-boot-spl.bin

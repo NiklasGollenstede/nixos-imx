@@ -4,6 +4,8 @@
 
 Firmware for the "secure world" / trust zone of ARM application processors, as forked by NXP for its i.MX processors.
 
+There is also `pkgs.buildArmTrustedFirmware`, which builds from upstream sources.
+
 
 ## Example
 
@@ -33,7 +35,10 @@ in {
             hash = "sha256-VnNWfA6ZYXDrYVEmvaU84eC9K5p/nayfwERjyhf48dQ=";
         });
         nativeBuildInputs = [ pkgs.gcc ]; # (required for cross-compiling ...)
-        buildPhase = ''platform=${platform} ; make PLAT=''${platform:?} bl31'';
+        makeFlags = lib.concatLists [
+            (lib.optional (lib.versionAtLeast pkgs.binutils.version "2.39") "LDFLAGS=--no-warn-rwx-segments") # binutils 2.39 (`warning: /build/source/build/rk3399/release/bl31/bl31.elf has a LOAD segment with RWX permissions`)
+            [ "PLAT=${platform}" "bl31" ]
+        ];
         installPhase = ''mkdir -p $out/ ; cp -v ./build/${platform}/release/bl31.bin $out/'';
         dontStrip = true;
     }) { };

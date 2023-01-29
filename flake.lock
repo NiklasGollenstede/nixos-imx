@@ -18,18 +18,34 @@
         "type": "github"
       }
     },
-    "nixpkgs": {
+    "nixos-hardware": {
       "locked": {
-        "lastModified": 1656265786,
-        "narHash": "sha256-A9RkoGrxzsmMm0vily18p92Rasb+MbdDMaSnzmywXKw=",
+        "lastModified": 1672644464,
+        "narHash": "sha256-RYlvRMcQNT7FDoDkViijQBHg9g+blsB+U6AvL/gAsPI=",
         "owner": "NixOS",
-        "repo": "nixpkgs",
-        "rev": "cd90e773eae83ba7733d2377b6cdf84d45558780",
+        "repo": "nixos-hardware",
+        "rev": "ca29e25c39b8e117d4d76a81f1e229824a9b3a26",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
-        "ref": "nixos-22.05",
+        "ref": "master",
+        "repo": "nixos-hardware",
+        "type": "github"
+      }
+    },
+    "nixpkgs": {
+      "locked": {
+        "lastModified": 1673345971,
+        "narHash": "sha256-4DfFcKLRfVUTyuGrGNNmw37IeIZSoku9tgTVmu/iD98=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "54644f409ab471e87014bb305eac8c50190bcf48",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "ref": "nixos-22.11",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -43,16 +59,17 @@
     "wiplib": {
       "inputs": {
         "config": "config",
+        "nixos-hardware": "nixos-hardware",
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1661927913,
-        "narHash": "sha256-fVHMkqdNoYpbld7FsOflnh+Uj8iNF6ZG4KIFlECqKFY=",
+        "lastModified": 1675022892,
+        "narHash": "sha256-5+J8pPhMJb53maas7+REod3PjlTEBpGSnrvzVuGLwAk=",
         "owner": "NiklasGollenstede",
         "repo": "nix-wiplib",
-        "rev": "1d93a8acc0cdf7ae88c7954fec9cf770cac8e119",
+        "rev": "9edfe9c9d84538e407fae58cc52d8cca44c2da2a",
         "type": "github"
       },
       "original": {

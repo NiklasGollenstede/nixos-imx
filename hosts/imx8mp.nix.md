@@ -34,9 +34,7 @@ in { imports = [ ({ ## Hardware
 
     # Disk setup:
     wip.fs.disks.devices.primary.size = 31657558016; # If this mismatches, use whatever the installer says.
-    wip.fs.temproot = { enable = true; temp.type = "tmpfs"; local.type = "bind"; remote.type = "none"; swap.size = "8G"; swap.asPartition = true; };
-    wip.fs.disks.partitions."local-${hash}" = { type = "8300"; };
-    fileSystems.${config.wip.fs.temproot.local.bind.source} = { fsType = "ext4"; device = "/dev/disk/by-partlabel/local-${hash}"; formatOptions = "-O inline_data -E nodiscard -F"; options = [ "nosuid" "nodev" "noatime" ]; };
+    wip.fs.temproot = { enable = true; temp.type = "tmpfs"; local.type = "bind"; local.bind.base = "ext4"; remote.type = "none"; swap.size = "8G"; swap.asPartition = true; };
 
     # Networking:
     networking.useDHCP = true;
@@ -44,7 +42,7 @@ in { imports = [ ({ ## Hardware
     wip.base.enable = true;
 
     # Fix »raid0« module missing:
-    imports = [ (lib.wip.makeNixpkgsModuleConfigOptional (specialArgs) "tasks/swraid.nix") ];
+    imports = [ (lib.wip.makeNixpkgsModuleConfigOptional "tasks/swraid.nix" { }) ];
     disableModule."tasks/swraid.nix" = true;
 
 

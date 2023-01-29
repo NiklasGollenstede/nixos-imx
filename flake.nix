@@ -7,7 +7,7 @@
 ); inputs = {
 
     # To update »./flake.lock«: $ nix flake update
-    nixpkgs = { url = "github:NixOS/nixpkgs/nixos-22.05"; };
+    nixpkgs = { url = "github:NixOS/nixpkgs/nixos-22.11"; };
     wiplib = { url = "github:NiklasGollenstede/nix-wiplib"; inputs.nixpkgs.follows = "nixpkgs"; };
     #nixos-imx = { url = "github:NiklasGollenstede/nixos-imx"; inputs.nixpkgs.follows = "nixpkgs"; inputs.wiplib.follows = "wiplib"; }; # (uncomment this when reusing this file in your own repo)
 
