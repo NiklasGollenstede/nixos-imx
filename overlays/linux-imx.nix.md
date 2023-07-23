@@ -10,7 +10,7 @@ NXP's fork of the Linux Kernel, built for NixOS.
 ```nix
 #*/# end of MarkDown, beginning of NixPkgs overlay:
 dirname: inputs: final: prev: let
-    inherit (final) pkgs; inherit (inputs.self) lib;
+    inherit (final) pkgs; lib = inputs.self.lib.__internal__;
 in {
 
     linux-imx_v8 = pkgs.callPackage (args@{
@@ -27,7 +27,7 @@ in {
     }: (pkgs.linuxKernel.manualConfig (args // rec {
 
         inherit version; src = pkgs.applyPatches { name = "linux-imx-patched"; src = pkgs.fetchgit {
-            url = "https://source.codeaurora.org/external/imx/linux-imx"; inherit rev hash;
+            url = "https://github.com/nxp-imx/linux-imx"; inherit rev hash;
         }; patches = [
             ../patches/linux-imx-extend-config.patch # Enable all features that NixOS wants.
             ../patches/linux-imx-remove-flags.patch
@@ -49,7 +49,7 @@ in {
         modDirVersion = "5.15.5";
         tag = "lf-${modDirVersion}-1.0.0"; # must use tags created by NXP (and not ones merged from upstream?)
         src = fetchgit {
-            url = "https://source.codeaurora.org/external/imx/linux-imx"; rev = tag;
+            url = "https://github.com/nxp-imx/linux-imx"; rev = tag;
             hash = "sha256-iTagiSjU65V7ZpKQa4IMZeRp8lTTcRNohJ2S2hgaETs=";
         };
     in lib.overrideDerivation (buildLinux (args // { # The structure of this was taken from <https://github.com/NixOS/nixpkgs/blob/nixos-21.11/pkgs/os-specific/linux/kernel/linux-rpi.nix>.

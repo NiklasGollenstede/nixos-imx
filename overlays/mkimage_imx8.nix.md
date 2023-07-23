@@ -16,7 +16,7 @@ Also, `mkimage_imx8` does not cross-compile. So when cross-compiling the system,
 
 ```nix
 { boot-image = let
-    SOC = cfg.soc; SOC_DIR = if lib.wip.startsWith "iMX8M" SOC then "iMX8M" else SOC;
+    SOC = cfg.soc; SOC_DIR = if lib.fun.startsWith "iMX8M" SOC then "iMX8M" else SOC;
     LPDDR_FW_VERSION = "_202006"; # This must match the files in »firmware-imx«.
     targetPkgs = if config.nixpkgs.crossSystem == null || config.nixpkgs.crossSystem.system == config.nixpkgs.localSystem.system then pkgs else import pkgs.path { inherit (config.nixpkgs) config overlays; localSystem.system = config.nixpkgs.crossSystem.system; crossSystem = null; }; # (don't try to cross-compile »mkimage_imx8«)
 in pkgs.stdenv.mkDerivation rec {
@@ -39,14 +39,14 @@ in pkgs.stdenv.mkDerivation rec {
 ```nix
 #*/# end of MarkDown, beginning of NixPkgs overlay:
 dirname: inputs: final: prev: let
-    inherit (final) pkgs; inherit (inputs.self) lib;
+    inherit (final) pkgs; lib = inputs.self.lib.__internal__;
 in {
 
     mkimage_imx8 = pkgs.stdenv.mkDerivation rec {
         meta = { license = lib.licenses.gpl2; description = "Boot image builder for i.MX8 boards."; };
         pname = "mkimage_imx8"; version = "lf-5.15.5-1.0.0"; commit = "22346a32a88aa752d4bad8f2ed1eb641e18849dc";
         src = pkgs.fetchgit {
-            url = "https://source.codeaurora.org/external/imx/imx-mkimage"; rev = commit;
+            url = "https://github.com/nxp-imx/imx-mkimage"; rev = commit;
             sha256 = "sha256-p0KyXpONeuLxt2f6k4cSiBchbPX4WUvbT63Mn5txfX4=";
         };
         patchPhase = ''substituteInPlace Makefile --replace "git rev-parse --short=8 HEAD" "echo ${builtins.substring 0 8 commit}"'';

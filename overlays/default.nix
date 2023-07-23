@@ -1,1 +1,1 @@
-dirname: inputs@{ self, nixpkgs, ...}: self.lib.wip.importOverlays inputs dirname { }
+dirname: inputs: inputs.self.lib.__internal__.fun.importOverlays inputs dirname { }

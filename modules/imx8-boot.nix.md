@@ -22,7 +22,7 @@ The `tasks/swraid.nix` module in `nixpkgs` unfortunately unconditionally include
 If there is a problem with the `raid0` kernel module, exclude the `tasks/swraid.nix` NixOS module form the host config in question:
 ```nix
 {
-    imports = [ (lib.wip.makeNixpkgsModuleConfigOptional "tasks/swraid.nix" { }) ]; # This can be set globally for all hosts, but may only be defined once per config.
+    imports = [ (lib.fun.makeNixpkgsModuleConfigOptional "tasks/swraid.nix" { }) ]; # This can be set globally for all hosts, but may only be defined once per config.
     disableModule."tasks/swraid.nix" = true; # And then the module can be disabled per host.
 } // { # OR
     imports = [ { disabledModules = [ "tasks/swraid.nix" ]; } ]; # Add this import only for hosts where the module is to be removed (but consider that this also removes any option definitions made by the module, which may break evaluation elsewhere).
@@ -34,7 +34,7 @@ If there is a problem with the `raid0` kernel module, exclude the `tasks/swraid.
 
 ```nix
 #*/# end of MarkDown, beginning of NixOS module:
-dirname: inputs: specialArgs@{ config, pkgs, lib, ... }: let inherit (inputs.self) lib; in let
+dirname: inputs: specialArgs@{ config, pkgs, lib, ... }: let lib = inputs.self.lib.__internal__; in let
     cfg = config.nxp.imx8-boot;
 in {
 
@@ -56,7 +56,7 @@ in {
 
         default-boot-image = let # This works for »SOC=iMX8MP«; other boards may need to copy in different files.
             targetPkgs = if config.nixpkgs.crossSystem == null || config.nixpkgs.crossSystem.system == config.nixpkgs.localSystem.system then pkgs else import pkgs.path { inherit (config.nixpkgs) config overlays; localSystem.system = config.nixpkgs.crossSystem.system; crossSystem = null; };
-            SOC = cfg.soc; SOC_DIR = if lib.wip.startsWith "iMX8M" SOC then "iMX8M" else SOC;
+            SOC = cfg.soc; SOC_DIR = if lib.fun.startsWith "iMX8M" SOC then "iMX8M" else SOC;
             LPDDR_FW_VERSION = "_202006"; # This must match the files in »firmware-imx«.
         in pkgs.stdenv.mkDerivation rec {
             # Found this when I was just about done. Nice to know someone else came to the same solution: https://gist.github.com/KunYi/6ababe7ca5f00eb87a216eb52f4bdc3b
@@ -89,10 +89,10 @@ in {
 
         ## Firmware:
         # Create partitions for the firmware+bootloader image and the bootloader config. These need to be in specific places, thus need to be created early (high order) while that space is still free, but partition index 1 should remain available for »/boot«:
-        wip.fs.disks.partitions."bootloader-${hash}" = { type = "ef02"; position = "64"; size = lib.mkDefault (toString (cfg.uboot.package.envOffset / 512 - 64)); index = lib.mkDefault 127; order = lib.mkDefault 2000; alignment = 1; }; # The boot image needs to start at position 32K (64×512b) and is about 2MB in size.
-        wip.fs.disks.partitions."uboot-env-${hash}" = { type = "ef02"; position = toString (cfg.uboot.package.envOffset / 512); size = toString (cfg.uboot.package.envSize / 512); index = lib.mkDefault 128; order = lib.mkDefault 2000; alignment = 1; }; # The position and size of the U-boot env are compiled into U-boot.
-        wip.fs.disks.postFormatCommands = ''
-            ${if (config.wip.fs.disks.partitions."bootloader-${hash}" or null) != null then ''
+        setup.disks.partitions."bootloader-${hash}" = { type = "ef02"; position = "64"; size = lib.mkDefault (toString (cfg.uboot.package.envOffset / 512 - 64)); index = lib.mkDefault 127; order = lib.mkDefault 2000; alignment = 1; }; # The boot image needs to start at position 32K (64×512b) and is about 2MB in size.
+        setup.disks.partitions."uboot-env-${hash}" = { type = "ef02"; position = toString (cfg.uboot.package.envOffset / 512); size = toString (cfg.uboot.package.envSize / 512); index = lib.mkDefault 128; order = lib.mkDefault 2000; alignment = 1; }; # The position and size of the U-boot env are compiled into U-boot.
+        installer.commands.postFormat = ''
+            ${if (config.setup.disks.partitions."bootloader-${hash}" or null) != null then ''
                 cat /dev/null         >/dev/disk/by-partlabel/bootloader-${hash}
                 cat ${cfg.boot-image} >/dev/disk/by-partlabel/bootloader-${hash}
             '' else ''
@@ -132,7 +132,7 @@ in {
 
         ## Bootloader:
         boot.loader.generic-extlinux-compatible.enable = true; boot.loader.grub.enable = false;
-        wip.fs.boot.enable = true; wip.fs.boot.createMbrPart = true;
+        setup.bootpart.enable = true; setup.bootpart.createMbr = true;
 
         ## Kernel:
         hardware.deviceTree.filter = lib.mkDefault "*${lib.toLower cfg.soc}*.dtb"; # (there is even a »imx8mp-evk.dtb« with the default kernel, but it has no display output)

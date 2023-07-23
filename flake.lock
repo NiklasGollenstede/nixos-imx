@@ -2,29 +2,79 @@
   "nodes": {
     "config": {
       "locked": {
-        "dir": "example/defaultConfig",
-        "lastModified": 1652094794,
-        "narHash": "sha256-YKsmTOispYxmmpf7i9BJ0Gt9itLcfyXExteYQoZUfGQ=",
+        "lastModified": 1,
+        "narHash": "sha256-elz+1VaAKxE4aTOOm+5MjsAUd+H1yHQyypfvA0PAnzs=",
+        "path": "./example/defaultConfig",
+        "type": "path"
+      },
+      "original": {
+        "path": "./example/defaultConfig",
+        "type": "path"
+      }
+    },
+    "config_2": {
+      "locked": {
+        "lastModified": 1,
+        "narHash": "sha256-EgEBMr5JbCUXVFMInh5Wn11jlMPlRyd1IpDPO8pLzYI=",
+        "path": "./example/defaultConfig",
+        "type": "path"
+      },
+      "original": {
+        "path": "./example/defaultConfig",
+        "type": "path"
+      }
+    },
+    "functions": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1689866380,
+        "narHash": "sha256-ffhw+7N2GLouEEsI4VjwWw324Gjqrr855OHmF9JYtTo=",
         "owner": "NiklasGollenstede",
-        "repo": "nix-wiplib",
-        "rev": "5e9cc7ce3440be9ce6aeeaedcc70db9c80489c5f",
+        "repo": "nix-functions",
+        "rev": "d4249dd208e055bfdf43a249894dabcac7ea8b24",
         "type": "github"
       },
       "original": {
-        "dir": "example/defaultConfig",
         "owner": "NiklasGollenstede",
-        "repo": "nix-wiplib",
-        "rev": "5e9cc7ce3440be9ce6aeeaedcc70db9c80489c5f",
+        "repo": "nix-functions",
+        "type": "github"
+      }
+    },
+    "installer": {
+      "inputs": {
+        "config": "config",
+        "functions": [
+          "functions"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1689868067,
+        "narHash": "sha256-KBcVw5eb40Vq/qDOMSHSD5SUvrP9IQBlX0rmz6JPf+8=",
+        "owner": "NiklasGollenstede",
+        "repo": "nixos-installer",
+        "rev": "6a886a839df96ea37b3b256d5ea2fbbe549d68a8",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NiklasGollenstede",
+        "repo": "nixos-installer",
         "type": "github"
       }
     },
     "nixos-hardware": {
       "locked": {
-        "lastModified": 1672644464,
-        "narHash": "sha256-RYlvRMcQNT7FDoDkViijQBHg9g+blsB+U6AvL/gAsPI=",
+        "lastModified": 1686838567,
+        "narHash": "sha256-aqKCUD126dRlVSKV6vWuDCitfjFrZlkwNuvj5LtjRRU=",
         "owner": "NixOS",
         "repo": "nixos-hardware",
-        "rev": "ca29e25c39b8e117d4d76a81f1e229824a9b3a26",
+        "rev": "429f232fe1dc398c5afea19a51aad6931ee0fb89",
         "type": "github"
       },
       "original": {
@@ -36,40 +86,48 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1673345971,
-        "narHash": "sha256-4DfFcKLRfVUTyuGrGNNmw37IeIZSoku9tgTVmu/iD98=",
+        "lastModified": 1689956312,
+        "narHash": "sha256-NV9yamMhE5jgz+ZSM2IgXeYqOvmGIbIIJ+AFIhfD7Ek=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "54644f409ab471e87014bb305eac8c50190bcf48",
+        "rev": "6da4bc6cb07cba1b8e53d139cbf1d2fb8061d967",
         "type": "github"
       },
       "original": {
         "owner": "NixOS",
-        "ref": "nixos-22.11",
+        "ref": "nixos-23.05",
         "repo": "nixpkgs",
         "type": "github"
       }
     },
     "root": {
       "inputs": {
+        "functions": "functions",
+        "installer": "installer",
         "nixpkgs": "nixpkgs",
         "wiplib": "wiplib"
       }
     },
     "wiplib": {
       "inputs": {
-        "config": "config",
+        "config": "config_2",
+        "functions": [
+          "functions"
+        ],
+        "installer": [
+          "installer"
+        ],
         "nixos-hardware": "nixos-hardware",
         "nixpkgs": [
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1675022892,
-        "narHash": "sha256-5+J8pPhMJb53maas7+REod3PjlTEBpGSnrvzVuGLwAk=",
+        "lastModified": 1688563099,
+        "narHash": "sha256-h8NY69XbuqHN9LPLZwPhBkwji0/DtsWgUnLH75ccssA=",
         "owner": "NiklasGollenstede",
         "repo": "nix-wiplib",
-        "rev": "9edfe9c9d84538e407fae58cc52d8cca44c2da2a",
+        "rev": "b0587d12a6f9dab63c2023fd8ced3560a9e89d6a",
         "type": "github"
       },
       "original": {

@@ -18,7 +18,7 @@ To use the package, acceptance of the license must be indicated, e.g. by setting
 ```nix
 #*/# end of MarkDown, beginning of NixPkgs overlay:
 dirname: inputs: final: prev: let
-    inherit (final) pkgs; inherit (inputs.self) lib;
+    inherit (final) pkgs; lib = inputs.self.lib.__internal__;
 in {
 
     firmware-imx = pkgs.stdenv.mkDerivation rec {

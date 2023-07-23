@@ -20,7 +20,7 @@ pkgs.imx-atf.override { platform = lib.toLower soc; }
 ```nix
 #*/# end of MarkDown, beginning of NixPkgs overlay:
 dirname: inputs: final: prev: let
-    inherit (final) pkgs; inherit (inputs.self) lib;
+    inherit (final) pkgs; lib = inputs.self.lib.__internal__;
 in {
 
     imx-atf = pkgs.callPackage ({
@@ -30,7 +30,7 @@ in {
         meta = { license = lib.licenses.mit; description = "ARM Trusted Firmware for the i.MX ${platform}"; };
         pname = "arm-trusted-firmware-${platform}"; version = "2.6"; # from »./Makefile«
         src = (pkgs.fetchgit {
-            url = "https://source.codeaurora.org/external/imx/imx-atf";
+            url = "https://github.com/nxp-imx/imx-atf";
             rev = "f78cb61a11da3d965be809ebf8b592a8c33f6473"; # from branch »github.com/master«
             hash = "sha256-VnNWfA6ZYXDrYVEmvaU84eC9K5p/nayfwERjyhf48dQ=";
         });

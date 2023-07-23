@@ -22,19 +22,19 @@ Then put the card into the board, and use the switch to re-enable power.
 
 ```nix
 #*/# end of MarkDown, beginning of NixOS config flake input:
-dirname: inputs: specialArgs@{ config, pkgs, lib, name, ... }: let inherit (inputs.self) lib; in let
+dirname: inputs: specialArgs@{ config, pkgs, lib, name, ... }: let lib = inputs.self.lib.__internal__; in let
     hash = builtins.substring 0 8 (builtins.hashString "sha256" name);
 in { imports = [ ({ ## Hardware
 
-    wip.preface.hardware = "aarch64"; system.stateVersion = "22.05";
+    nixpkgs.hostPlatform = "aarch64-linux"; system.stateVersion = "22.05";
 
     # Booting:
     nxp.imx8-boot.enable = true; nxp.imx8-boot.soc = "iMX8MP";
     nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [ "firmware-imx" ];
 
     # Disk setup:
-    wip.fs.disks.devices.primary.size = 31657558016; # If this mismatches, use whatever the installer says.
-    wip.fs.temproot = { enable = true; temp.type = "tmpfs"; local.type = "bind"; local.bind.base = "ext4"; remote.type = "none"; swap.size = "8G"; swap.asPartition = true; };
+    setup.disks.devices.primary.size = 31657558016; # If this mismatches, use whatever the installer says.
+    setup.temproot = { enable = true; temp.type = "tmpfs"; local.type = "bind"; local.bind.base = "ext4"; remote.type = "none"; swap.size = "8G"; swap.asPartition = true; };
 
     # Networking:
     networking.useDHCP = true;
@@ -42,7 +42,7 @@ in { imports = [ ({ ## Hardware
     wip.base.enable = true;
 
     # Fix »raid0« module missing:
-    imports = [ (lib.wip.makeNixpkgsModuleConfigOptional "tasks/swraid.nix" { }) ];
+    imports = [ (lib.fun.makeNixpkgsModuleConfigOptional "tasks/swraid.nix" { }) ];
     disableModule."tasks/swraid.nix" = true;
 
 

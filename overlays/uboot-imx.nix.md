@@ -18,7 +18,7 @@ pkgs.uboot-imx.override { platform = lib.toLower soc; }
 ```nix
 #*/# end of MarkDown, beginning of NixPkgs overlay:
 dirname: inputs: final: prev: let
-    inherit (final) pkgs; inherit (inputs.self) lib;
+    inherit (final) pkgs; lib = inputs.self.lib.__internal__;
 in {
 
     uboot-imx = pkgs.callPackage ({
@@ -33,7 +33,7 @@ in {
     in rec {
         version = "lf-5.15.5-1.0.0"; commit = "f7b43f8b4c1e4e3ee6c6ff2fe9c61b2092e8b96b"; # (from tag)
         src = pkgs.fetchgit {
-            url = "https://source.codeaurora.org/external/imx/uboot-imx"; rev = commit;
+            url = "https://github.com/nxp-imx/uboot-imx"; rev = commit;
             hash = "sha256-wiUTdCMuRPPR8jIaPOOomyEb3F6JHj1ZFwkeAguGl78=";
         }; patches = [ ];
         defconfig = "${platform}${platformSuffix}_defconfig";

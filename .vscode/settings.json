@@ -10,6 +10,7 @@
         "binutils",
         "bootcmd",
         "bootloader",
+        "bootpart",
         "builtins",
         "concat",
         "configfile",
